@@ -9,8 +9,8 @@
 		<version>2.0.2.RELEASE</version>
 	</parent>
 
-	<groupId>bookmarks</groupId>
-	<artifactId>bookmarks</artifactId>
+	<groupId>com.contaazaul</groupId>
+	<artifactId>bankslips</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -21,7 +21,6 @@
 
 	<modules>
 		<module>rest</module>
-		<module>security</module>
 		<module>model</module>
 		<module>hateoas</module>
 	</modules>
@@ -30,6 +29,11 @@
 		<dependency>
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
 		</dependency>
 
 		<!-- Test only dependencies -->

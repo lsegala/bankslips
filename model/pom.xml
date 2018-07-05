@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>bookmarks</groupId>
-		<artifactId>bookmarks</artifactId>
+		<groupId>com.contaazaul</groupId>
+		<artifactId>bankslips</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 

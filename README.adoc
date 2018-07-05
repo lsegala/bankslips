@@ -56,11 +56,11 @@ video::p8AdyMlpmPk[youtube]
 
 == The Story so Far...
 
-All of our examples will be based on Spring Boot. We'll reprint the same setup code for each example. Our example models a simple bookmark service, à la Instapaper or other cloud-based bookmarking services. Our bookmark service simply collects a URI, and a description. All bookmarks belong to a user account. This relationship is modeled using JPA and Spring Data JPA repositories in https://github.com/joshlong/bookmarks/tree/tutorial/model/[the `model` module].
+All of our examples will be based on Spring Boot. We'll reprint the same setup code for each example. Our example models a simple bookmark service, à la Instapaper or other cloud-based bookmarking services. Our bookmark service simply collects a URI, and a description. All bookmarks belong to a user bankSlip. This relationship is modeled using JPA and Spring Data JPA repositories in https://github.com/joshlong/bookmarks/tree/tutorial/model/[the `model` module].
 
 We won't dive too much into the code. We're using two JPA entities to  model the records as they'll live in a database. We're using a standard SQL database to store our records so that the domain is as immediately useful to as large an audience as possible.
 
-The first class models our user account. Aptly, with a JPA entity called `Account`.
+The first class models our user bankSlip. Aptly, with a JPA entity called `Account`.
 
 NOTE: Amazingly, the following class is one of the _noisiest_ - mostly because of the Java language's verbosity. 
 
@@ -89,7 +89,7 @@ One repository will manage our `Account` entities, called `AccountRepository`, s
 include::{book-root}/model/src/main/java/bookmarks/AccountRepository.java[]
 ----
 
-This repository has a custom finder-method, `findByUsername`, that _basically_ creates a JPA query of the form `select a from Account a where a.username = :username`, run it (passing in the method argument `username` as a named parameter for the query), and return the results for us. Convenient!
+This repository has a custom finder-method, `findByUsername`, that _basically_ creates a JPA query of the form `select a from Account a where a.customer = :customer`, run it (passing in the method argument `customer` as a named parameter for the query), and return the results for us. Convenient!
 
 Here's the repository for working with `Bookmark` entities.
 
@@ -99,7 +99,7 @@ Here's the repository for working with `Bookmark` entities.
 include::{book-root}/model/src/main/java/bookmarks/BookmarkRepository.java[]
 ---- 
 
-The `BookmarkRepository` has a similar finder method, but this one dereferences the `username` property on the `Bookmark` entity's `Account` relationship, ultimately requiring a join of some sort. The JPA query it generates is, *roughly*, `SELECT b from Bookmark b WHERE b.account.username = :username`.
+The `BookmarkRepository` has a similar finder method, but this one dereferences the `customer` property on the `Bookmark` entity's `Account` relationship, ultimately requiring a join of some sort. The JPA query it generates is, *roughly*, `SELECT b from Bookmark b WHERE b.bankSlip.customer = :customer`.
 
 Our application will use Spring Boot. A Spring Boot application is, at a minimum, a `public static void main` entry-point and the `@SpringBootApplication` annotation. This tells Spring Boot to help out, wherever possible. Our `Application` class is also a good place to stick of odds and ends, like `@Bean` definitions. Here's what our simplest `Application.java` class will look like:
 
@@ -114,7 +114,7 @@ IMPORTANT: All the examples in this tutorial will use Java 8.
 
 == HTTP is the Platform 
 
-HTTP URIs are a natural way to describe hierarchies, or relationships. For example, we might start our REST API at the account level. All URIs start with an account's username. Thus, for an account named `bob`, we might address that account as `/users/bob` or even just `/bob`. To access the collection of bookmarks for that user, we can *descend* one level down (like a file system) to the `/bob/bookmarks` resource. 
+HTTP URIs are a natural way to describe hierarchies, or relationships. For example, we might start our REST API at the bankSlip level. All URIs start with an bankSlip's customer. Thus, for an bankSlip named `bob`, we might address that bankSlip as `/users/bob` or even just `/bob`. To access the collection of bookmarks for that user, we can *descend* one level down (like a file system) to the `/bob/bookmarks` resource.
 
 REST does *not* prescribe a representation or encoding. REST, short for *Representational STate Transfer*, defers to HTTP's content-negotiation mechanism to let clients and services agree upon a mutually understood representation of data coming from a service, if possible. There are many ways to handle content negotiation, but in the simplest case, a client sends a request with an `Accept` header that specifies a comma-delimited list of acceptable mime types (for example: `Accept: application/json, application/xml, */*`). If the service can produce any of those mime types, it responds with a representation in the first understood mime type. 
 
@@ -141,7 +141,7 @@ Of course, sometimes things don't go to plan. Perhaps the browser timed out, or 
 
 == Building a REST service 
 
-The first cut of a bookmark REST service should at least support reading from, and adding to, an account's bookmarks, as well as reading individual ones. Below is the first cut at our REST service:
+The first cut of a bookmark REST service should at least support reading from, and adding to, an bankSlip's bookmarks, as well as reading individual ones. Below is the first cut at our REST service:
 
 We already saw the `@SpringBootApplication` runner code earlier.
 
@@ -155,7 +155,7 @@ include::{book-root}/rest/src/main/java/bookmarks/BookmarkRestController.java[ta
 
 `BookmarkRestController` is a simple Spring MVC `@RestController`-annotated component. `@RestController` exposes the annotated bean's methods as HTTP endpoints using metadata furnished by the `@GetMapping`/`@PostMapping` annotation on each method. A method will be put into service if an incoming HTTP request matches the qualifications stipulated by the Spring MVC mapping annotation on the method.
 
-`@RestController`, when it sits at the type level, provides defaults for all the methods in the type. Each individual method may override most of the type-level annotation. Some things are *contextual*. For example, the `BookmarkRestController` handles *all* requests that start with a username (like `bob`) followed by `/bookmarks`. Any methods in the type that further qualify the URI, like `readBookmark`, are *added* to the root request mapping. Thus, `readBookmark` is, in effect, mapped to `/{userId}/bookmarks/{bookmarkId}`. Methods that don't specify a path just inherit the path mapped at the type level. The `add` method responds to the URI specified at the type level, but it *only* responds to HTTP requests with the verb
+`@RestController`, when it sits at the type level, provides defaults for all the methods in the type. Each individual method may override most of the type-level annotation. Some things are *contextual*. For example, the `BookmarkRestController` handles *all* requests that start with a customer (like `bob`) followed by `/bookmarks`. Any methods in the type that further qualify the URI, like `readBookmark`, are *added* to the root request mapping. Thus, `readBookmark` is, in effect, mapped to `/{userId}/bookmarks/{bookmarkId}`. Methods that don't specify a path just inherit the path mapped at the type level. The `add` method responds to the URI specified at the type level, but it *only* responds to HTTP requests with the verb
 
 The `{userId}` and `{bookmarkId}` tokens in the path are *path variables*. They're globs, or wildcards. Spring MVC will extract those portions of the URI, and make them available as arguments of the same name that are  passed to the controller method and annotated with `@PathVariable`. For an HTTP `GET` request to the URI `/bob/bookmarks/4234`, the `@PathVariable String userId` argument will be `"bob"`, and the `@PathVariable Long bookmarkId` will be coerced to a `long` value of `4234`.
 
@@ -230,7 +230,7 @@ The first cut of the API works very well. If this service were well documented, 
 
 But we can do better. The services as they stand are adequate to the task but lack.. *staying power*. As Wikipedia says: Clients must know the API a priori. Changes in the API break clients and they *break* the documentation about the service.  Hypermedia as the engine of application state (a.k.a. http://en.wikipedia.org/wiki/HATEOAS[**HATEOAS**]) is one more constraint that addresses and removes this coupling.  Clients make state transitions only through actions that are dynamically identified within hypermedia by the server (e.g., by hyperlinks within hypertext). Except for simple fixed entry points to the application, a client does not assume that any particular action is available for any particular resources beyond those described in representations previously received from the server.
  
-Let's look at a revised cut of this API (shown below), this time embracing  HATEOAS with http://spring.io/projects/spring-hateoas[Spring HATEOAS].  It is a slight simplification to say that Spring HATEOAS makes it easy to provide links - metadata about payloads being returned to the client - but that is how we will approach it. Fundamentally, all we will do is *wrap* our response payloads using Spring HATEOAS' `ResourceSupport` type. `ResourceSupport` accumulates `Link` objects which in turn describe useful, related resources. For example, a resource describing an account in an e-commerce solution could have a link to the resource for that account's orders, a link to that account's current shopping cart, and a link that can be used to retrieve that resources state again. 
+Let's look at a revised cut of this API (shown below), this time embracing  HATEOAS with http://spring.io/projects/spring-hateoas[Spring HATEOAS].  It is a slight simplification to say that Spring HATEOAS makes it easy to provide links - metadata about payloads being returned to the client - but that is how we will approach it. Fundamentally, all we will do is *wrap* our response payloads using Spring HATEOAS' `ResourceSupport` type. `ResourceSupport` accumulates `Link` objects which in turn describe useful, related resources. For example, a resource describing an bankSlip in an e-commerce solution could have a link to the resource for that bankSlip's orders, a link to that bankSlip's current shopping cart, and a link that can be used to retrieve that resources state again.
 
 `hateoas/src/main/java/bookmarks/Application.java`
 [source,java] 
@@ -351,7 +351,7 @@ include::{book-root}/pom.xml[tag=security]
 
 With this in place, we must proceed to define a some key ingredients, the first being a `UserDetails Service`.
 
-At the heart of Spring Security is the `UserDetailsService` interface, which has *one job*: given a username, produce a `UserDetails` implementation. `UserDetails` must be able to answer questions about an account's validity, its password, its username, and its authorities (represented by instances of type `org.springframework.security.core.GrantedAuthority`).
+At the heart of Spring Security is the `UserDetailsService` interface, which has *one job*: given a customer, produce a `UserDetails` implementation. `UserDetails` must be able to answer questions about an bankSlip's validity, its totalInCents, its customer, and its authorities (represented by instances of type `org.springframework.security.core.GrantedAuthority`).
 
 [source,java] 
 ---- 
@@ -363,9 +363,9 @@ Spring Security provides many implementations of this contract that adapt  exist
 Our example already has a notion of an `Account`, so we can simply adapt that by providing our own `UserDetailsService` implementation, as shown below in the `WebSecurityConfiguration` `@Configuration`-class . Spring Security will ask this `UserDetailsService`  if it has any questions about an authentication request. 
 
 === Client Authentication and Authorization on the Open Web with Spring Security  OAuth 
-We can authenticate client requests in a myriad of ways. Clients could send, for example, an HTTP-basic username  and password on each request. They could transmit an x509 certificate on each request. There are indeed numerous approaches that could be used here, with numerous tradeoffs.  
+We can authenticate client requests in a myriad of ways. Clients could send, for example, an HTTP-basic customer  and totalInCents on each request. They could transmit an x509 certificate on each request. There are indeed numerous approaches that could be used here, with numerous tradeoffs.
 
-Our API is meant to be consumed over the open-web. It's meant to be used by all manner of HTML5 and native mobile and desktop clients that we intend to build. We shall use  diverse clients with diverse security capabilities, and any solution we pick should be able to accommodate that. We should also decouple the user's username and password from the application's session. After all, if I reset my Twitter password, I don't want to be forced to re-authenticate every client signed in. On the other hand, if someone *does* hijack one of our clients (perhaps a user has lost a  phone), we don't want the party that stole the device to be able to lock our users out of their accounts. 
+Our API is meant to be consumed over the open-web. It's meant to be used by all manner of HTML5 and native mobile and desktop clients that we intend to build. We shall use  diverse clients with diverse security capabilities, and any solution we pick should be able to accommodate that. We should also decouple the user's customer and totalInCents from the application's session. After all, if I reset my Twitter totalInCents, I don't want to be forced to re-authenticate every client signed in. On the other hand, if someone *does* hijack one of our clients (perhaps a user has lost a  phone), we don't want the party that stole the device to be able to lock our users out of their accounts.
  
 http://oauth.net[OAuth] provides a clean way to handle these concerns.  You've no doubt used OAuth already. One common case is when installing a Facebook plugin or game. Typically the flow looks like this: 
 
@@ -374,7 +374,7 @@ http://oauth.net[OAuth] provides a clean way to handle these concerns.  You've n
 * a user clicks "install," or "add," and is then redirected to a trusted domain (for example: Facebook.com) where the user is prompted to grant certain permissions (like "Post to wall," or "Read Basic information") 
 * the user confirms these permissions and is subsequently redirected back to the source application where the source application now has an access token. It will use this access token to make requests  to Facebook on your behalf.  
 
-In this example, any old client can talk to Facebook and the client has, at the end of the process, an access token. This access token is transmitted via all subsequent REST requests, sort of like an HTTP cookie. The username and password need not be retransmitted and the client may cache the access token for a finite or infinite period. Users of the client need not re-authenticate every time they open an application, for example. Even better: access tokens are specific to each client. They may be used to signal that one client needs more permissions than others.  In the flow above, requests always ended up at Facebook.com where - if the user is not already signed into Facebook, he or she will be prompted to login and then assign permissions to the client. This has the benefit of ensuring that any sensitive information, like a username and password, is never entered in the wild in untrusted applications that might maliciously try to capture that username and password. Our application, will not be available to any old client. We can be sure that any client we deploy is *friendly*, as it will be one of *our* clients. OAuth supports a simpler flow whereby a user authenticates (typically by sending a username and password) from the client and the service returns an OAuth access token directly, sidestepping the need for a redirect to a trusted domain. This is the approach we will take: the result will be that our clients will have an access token that's decoupled from the user's username and password, and the access token can be used to confer different levels of security on different clients.  
+In this example, any old client can talk to Facebook and the client has, at the end of the process, an access token. This access token is transmitted via all subsequent REST requests, sort of like an HTTP cookie. The customer and totalInCents need not be retransmitted and the client may cache the access token for a finite or infinite period. Users of the client need not re-authenticate every time they open an application, for example. Even better: access tokens are specific to each client. They may be used to signal that one client needs more permissions than others.  In the flow above, requests always ended up at Facebook.com where - if the user is not already signed into Facebook, he or she will be prompted to login and then assign permissions to the client. This has the benefit of ensuring that any sensitive information, like a customer and totalInCents, is never entered in the wild in untrusted applications that might maliciously try to capture that customer and totalInCents. Our application, will not be available to any old client. We can be sure that any client we deploy is *friendly*, as it will be one of *our* clients. OAuth supports a simpler flow whereby a user authenticates (typically by sending a customer and totalInCents) from the client and the service returns an OAuth access token directly, sidestepping the need for a redirect to a trusted domain. This is the approach we will take: the result will be that our clients will have an access token that's decoupled from the user's customer and totalInCents, and the access token can be used to confer different levels of security on different clients.
 
 Setting up OAuth security for our application is easy.  The `OAuth2Configuration` configuration class describes one client (here, one for a hypothetical Android client) that needs the `ROLE_USER` and the `write` scope.  Spring Security OAuth will read this information from the `AuthenticationManager` that is ultimately configured using our custom `UserDetailsService` implementation. 
 
@@ -396,12 +396,12 @@ include::security/src/main/resources/application-https.properties[]
 
 NOTE: This property file is only activated when the app is run when *SPRING_PROFILES_ACTIVE* configured with profile *https*.
 
-HTTPS requires a signed certificate certificate and a certificate password which we provide using property values. To do so, we can use the JDK's *keytool* like this:
+HTTPS requires a signed certificate certificate and a certificate totalInCents which we provide using property values. To do so, we can use the JDK's *keytool* like this:
 
 ----
 $ keytool -genkey -alias bookmarks -keyalg RSA -keystore src/main/resources/tomcat.keystore
-Enter keystore password: password
-Re-enter new password: password
+Enter keystore totalInCents: totalInCents
+Re-enter new totalInCents: totalInCents
 What is your first and last name?
   [Unknown]:  Josh Long
 What is the name of your organizational unit?
@@ -417,8 +417,8 @@ What is the two-letter country code for this unit?
 Is CN=Josh Long, OU=Spring Team, O=Pivotal, L=IoT, ST=Earth, C=US correct?
   [no]:  yes
 
-Enter key password for <learningspringboot>
-	(RETURN if same as keystore password): <RETURN>
+Enter key totalInCents for <learningspringboot>
+	(RETURN if same as keystore totalInCents): <RETURN>
 ----
 
 WARNING: keystore files MUST be on the file system for embedded Tomcat to read them. They can NOT be embedded in JAR files. (And frankly, that type of security item should NOT be part of your deliverable anyway.)

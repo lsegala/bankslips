@@ -15,11 +15,18 @@
  */
 package bookmarks;
 
-// tag::code[]
-class UserNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-	public UserNotFoundException(String userId) {
-		super("could not find user '" + userId + "'.");
+/**
+ * @author Greg Turnquist
+ */
+// tag::code[]
+@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+class BankSlipCreationException extends RuntimeException {
+
+	public BankSlipCreationException() {
+		super("não foi possível criar o boleto.");
 	}
 }
 // end::code[]

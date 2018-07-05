@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,18 @@
  */
 package bookmarks;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * @author Greg Turnquist
  */
-class BookmarkNotFoundException extends RuntimeException {
+// tag::code[]
+@ResponseStatus(HttpStatus.NOT_FOUND)
+class BankSlipNotFoundException extends RuntimeException {
 
-	public BookmarkNotFoundException(Long bookmarkId) {
-		super("could not find bookmark '" + bookmarkId + "'.");
+	public BankSlipNotFoundException(Long id) {
+		super("Bankslip not found with the specified id");
 	}
 }
+// end::code[]

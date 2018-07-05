@@ -1,4 +1,4 @@
-package bankslips;
+package com.contaazul.bankslips;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -123,11 +123,11 @@ public class BankSlipRestControllerTest {
         Calendar dueDate = Calendar.getInstance();
         BigDecimal totalInCents = new BigDecimal(100000);
         BankSlip bankSlip = new BankSlip(customer, dueDate, totalInCents);
-        String bookmarkJson = json(bankSlip);
+        String bankSlipJson = json(bankSlip);
 
         this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
-                .content(bookmarkJson))
+                .content(bankSlipJson))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.customer", is(customer)))
                 .andExpect(jsonPath("$.due_date", startsWith(dateToString(dueDate))))

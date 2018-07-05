@@ -1,4 +1,4 @@
-package bankslips;
+package com.contaazul.bankslips;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

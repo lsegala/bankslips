@@ -1,5 +1,5 @@
 // tag::runner[]
-package bankslips;
+package com.contaazul.bankslips;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,7 +27,7 @@ public class Application {
 	public Docket newsApi() {
 		return new Docket(DocumentationType.SWAGGER_2)
 				.select()
-				.apis(RequestHandlerSelectors.basePackage("bookmarks"))
+				.apis(RequestHandlerSelectors.basePackage("com.contaazul.bankslips"))
 				.paths(regex("/bankslip.*"))
 				.build()
 				.apiInfo(apiInfo());

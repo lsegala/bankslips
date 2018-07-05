@@ -1,4 +1,4 @@
-package bankslips;
+package com.contaazul.bankslips;
 
 import org.junit.Before;
 import org.junit.Rule;

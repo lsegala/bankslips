@@ -1,4 +1,4 @@
-package bankslips;
+package com.contaazul.bankslips;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,7 +38,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) ((ServletWebRequest) request).getNativeRequest();
-        if(ex.getMessage().contains("Cannot deserialize value of type `bookmarks.BankSlipStatus` from String")){
+        if(ex.getMessage().contains("Cannot deserialize value of type `com.contaazul.bankslips.BankSlipStatus` from String")){
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(BankSlipListener.ERROR_MESSAGE);
         }

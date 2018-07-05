@@ -1,4 +1,4 @@
-package bankslips;
+package com.contaazul.bankslips;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;

@@ -1,4 +1,4 @@
-package bankslips;
+package com.contaazul.bankslips;
 
 /**
  * Criado por leonardo.segala em 04/07/2018.

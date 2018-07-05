@@ -1,4 +1,4 @@
-package bookmarks;
+package bankslips;
 
 /**
  * Criado por leonardo.segala em 04/07/2018.

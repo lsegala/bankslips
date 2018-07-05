@@ -1,4 +1,4 @@
-package bookmarks;
+package bankslips;
 
 import org.springframework.util.StringUtils;
 

@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Criado por leonardo.segala em 04/07/2018.
@@ -15,6 +16,11 @@ public class BankSlipListener {
             "* A field of the provided bankslip was null or with invalid values";
 
     @PrePersist
+    public void generateUUID(BankSlip obj) throws BankSlipConstraintException {
+        obj.setId(UUID.randomUUID().toString());
+        validar(obj);
+    }
+
     @PreUpdate
     public void validar(BankSlip obj) throws BankSlipConstraintException {
         if(obj.getDueDate() == null){

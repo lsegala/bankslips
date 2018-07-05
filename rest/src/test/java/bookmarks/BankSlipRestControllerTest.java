@@ -28,9 +28,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -89,6 +87,7 @@ public class BankSlipRestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.customer", is(bankSlip.getCustomer())))
+                .andExpect(jsonPath("$.status", is(BankSlipStatus.PENDING+"")))
                 .andExpect(jsonPath("$.due_date", startsWith(dateToString(bankSlip.getDueDate()))))
                 .andExpect(jsonPath("$.total_in_cents", is(bankSlip.getTotalInCents().intValue()+"")));
     }
@@ -98,7 +97,7 @@ public class BankSlipRestControllerTest {
         List<BankSlip> lista = new ArrayList<>();
 
         lista.add(this.bankSlipRepository.save(new BankSlip("Ford Prefect Company", parseDate("2018-01-01"), new BigDecimal(100000))));
-        lista.add(this.bankSlipRepository.save(new BankSlip("Zaphod Company", parseDate("2018-02-01"), new BigDecimal(200000))));
+        lista.add(this.bankSlipRepository.save(new BankSlip("Zaphod Company", parseDate("2018-02-01"), new BigDecimal(200000), BankSlipStatus.PAID)));
 
         mockMvc.perform(get("/bankslips"))
                 .andExpect(status().isOk())
@@ -107,9 +106,11 @@ public class BankSlipRestControllerTest {
                 .andExpect(jsonPath("$[0].customer", is(lista.get(0).getCustomer())))
                 .andExpect(jsonPath("$[0].due_date", startsWith(dateToString(lista.get(0).getDueDate()))))
                 .andExpect(jsonPath("$[0].total_in_cents", is(lista.get(0).getTotalInCents().intValue()+"")))
+                .andExpect(jsonPath("$[0].status", is(BankSlipStatus.PENDING+"")))
                 .andExpect(jsonPath("$[1].customer", is(lista.get(1).getCustomer())))
                 .andExpect(jsonPath("$[1].due_date", startsWith(dateToString(lista.get(1).getDueDate()))))
-                .andExpect(jsonPath("$[1].total_in_cents", is(lista.get(1).getTotalInCents().intValue()+"")));
+                .andExpect(jsonPath("$[1].total_in_cents", is(lista.get(1).getTotalInCents().intValue()+"")))
+                .andExpect(jsonPath("$[1].status", is(BankSlipStatus.PAID+"")));
     }
 
     @Test
@@ -126,7 +127,8 @@ public class BankSlipRestControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.customer", is(customer)))
                 .andExpect(jsonPath("$.due_date", startsWith(dateToString(dueDate))))
-                .andExpect(jsonPath("$.total_in_cents", is(totalInCents.intValue()+"")));
+                .andExpect(jsonPath("$.total_in_cents", is(totalInCents.intValue()+"")))
+                .andExpect(jsonPath("$.status", is(BankSlipStatus.PENDING+"")));
     }
 
     @Test
@@ -175,6 +177,12 @@ public class BankSlipRestControllerTest {
                 .content(bankSplitJson))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().string(messageExpected));
+
+        this.mockMvc.perform(post("/bankslips")
+                .contentType(contentType)
+                .content("{\"id\":null,\"customer\":\"Trillian Company\",\"status\":\"NOT_EXISTS\",\"due_date\":\"2018-01-01\",\"payment_date\":null,\"total_in_cents\":\"10000\"}"))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(messageExpected));
     }
 
     @Test
@@ -183,8 +191,7 @@ public class BankSlipRestControllerTest {
                 .contentType(contentType)
                 .content("{\"payment_date\" : \"2018-06-30\"}"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Bankslip not found with the specified id"))
-                .andDo(print());
+                .andExpect(content().string("Bankslip not found with the specified id"));
     }
 
     @Test
@@ -200,8 +207,31 @@ public class BankSlipRestControllerTest {
                 .content("{\"payment_date\" : \"2018-06-30\"}"))
                 .andExpect(status().isNoContent());
 
-        Calendar paymentDate = bankSlipRepository.findById(bankSlip.getId()).get().getPaymentDate();
-        assertEquals("2018-06-30", dateToString(paymentDate));
+        BankSlip bankSlipActual = bankSlipRepository.findById(bankSlip.getId()).get();
+        assertEquals("2018-06-30", dateToString(bankSlipActual.getPaymentDate()));
+        assertEquals(BankSlipStatus.PAID, bankSlipActual.getStatus());
+    }
+
+    @Test
+    public void doCancelPaymentWithNonExistentBankSplip() throws Exception {
+        this.mockMvc.perform(delete("/bankslips/1")
+                .contentType(contentType))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Bankslip not found with the specified id"));
+    }
+
+    @Test
+    public void doCancelPayment() throws Exception {
+        BankSlip bankSlip = new BankSlip("Trillian Company", Calendar.getInstance(), new BigDecimal(100000));
+        bankSlipRepository.save(bankSlip);
+
+        this.mockMvc.perform(delete("/bankslips/" + bankSlip.getId())
+                .contentType(contentType))
+                .andExpect(status().isNoContent());
+
+        BankSlip bankSlipActual = bankSlipRepository.findById(bankSlip.getId()).get();
+        assertEquals(BankSlipStatus.CANCELED, bankSlipActual.getStatus());
+
     }
 
     protected String json(Object o) throws IOException {

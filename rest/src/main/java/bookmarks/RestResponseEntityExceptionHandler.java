@@ -38,6 +38,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) ((ServletWebRequest) request).getNativeRequest();
+        if(ex.getMessage().contains("Cannot deserialize value of type `bookmarks.BankSlipStatus` from String")){
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(BankSlipListener.ERROR_MESSAGE);
+        }
         if(httpServletRequest.getRequestURI().contains("/bankslips")){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Bankslip not provided in the request body");

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class BankSlipNotFoundException extends RuntimeException {
 
-	public BankSlipNotFoundException(Long id) {
+	public BankSlipNotFoundException() {
 		super("Bankslip not found with the specified id");
 	}
 }

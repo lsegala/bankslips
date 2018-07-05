@@ -3,12 +3,8 @@ package bookmarks;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.apache.commons.lang.time.DateUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,8 +16,7 @@ import java.util.Optional;
 public class BankSlip {
 
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
 
     private String customer;
 
@@ -37,15 +32,26 @@ public class BankSlip {
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal totalInCents;
 
+    @Enumerated(EnumType.STRING)
+    private BankSlipStatus status;
+
     private BankSlip() { } // JPA only
 
     public BankSlip( final String customer, final Calendar dueDate, final BigDecimal totalInCents) {
         this.customer = customer;
         this.dueDate = dueDate;
         this.totalInCents = totalInCents;
+        this.status = BankSlipStatus.PENDING;
     }
 
-    public Long getId() {
+    public BankSlip(String customer, Calendar dueDate, BigDecimal totalInCents, BankSlipStatus status) {
+        this.customer = customer;
+        this.dueDate = dueDate;
+        this.totalInCents = totalInCents;
+        this.status = status;
+    }
+
+    public String getId() {
         return id;
     }
 
@@ -77,5 +83,17 @@ public class BankSlip {
 
     public void setPaymentDate(Calendar paymentDate) {
         this.paymentDate = paymentDate;
+    }
+
+    public BankSlipStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BankSlipStatus status) {
+        this.status = status;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

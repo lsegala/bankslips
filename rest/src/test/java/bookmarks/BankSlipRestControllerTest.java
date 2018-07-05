@@ -39,6 +39,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 public class BankSlipRestControllerTest {
+    public static final String BANKSLIP_NOT_FOUND_MESSAGE = "Bankslip not found with the specified id";
+    public static final String CONTEXT = "/bankslips";
+    public static final String TRILLIAN_COMPANY = "Trillian Company";
+    public static final String DATE = "2018-01-01";
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             Charset.forName("utf8"));
@@ -66,7 +70,7 @@ public class BankSlipRestControllerTest {
     }
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         this.bankSlipRepository.deleteAllInBatch();
     }
@@ -76,14 +80,14 @@ public class BankSlipRestControllerTest {
         mockMvc.perform(get("/bankslips/1")
                 .contentType(contentType))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Bankslip not found with the specified id"));
+                .andExpect(content().string(BANKSLIP_NOT_FOUND_MESSAGE));
     }
 
     @Test
     public void readSingleBankSlip() throws Exception {
-        BankSlip bankSlip = this.bankSlipRepository.save(new BankSlip("Trillian Company", parseDate("2018-01-01"), new BigDecimal(100000)));
+        BankSlip bankSlip = this.bankSlipRepository.save(new BankSlip(TRILLIAN_COMPANY, parseDate(DATE), new BigDecimal(100000)));
 
-        mockMvc.perform(get("/bankslips/" + bankSlip.getId()))
+        mockMvc.perform(get(CONTEXT + "/" + bankSlip.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.customer", is(bankSlip.getCustomer())))
@@ -96,10 +100,10 @@ public class BankSlipRestControllerTest {
     public void readAllBankSlips() throws Exception {
         List<BankSlip> lista = new ArrayList<>();
 
-        lista.add(this.bankSlipRepository.save(new BankSlip("Ford Prefect Company", parseDate("2018-01-01"), new BigDecimal(100000))));
+        lista.add(this.bankSlipRepository.save(new BankSlip("Ford Prefect Company", parseDate(DATE), new BigDecimal(100000))));
         lista.add(this.bankSlipRepository.save(new BankSlip("Zaphod Company", parseDate("2018-02-01"), new BigDecimal(200000), BankSlipStatus.PAID)));
 
-        mockMvc.perform(get("/bankslips"))
+        mockMvc.perform(get(CONTEXT))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -115,13 +119,13 @@ public class BankSlipRestControllerTest {
 
     @Test
     public void createBankSlip() throws Exception {
-        String customer = "Trillian Company";
+        String customer = TRILLIAN_COMPANY;
         Calendar dueDate = Calendar.getInstance();
         BigDecimal totalInCents = new BigDecimal(100000);
         BankSlip bankSlip = new BankSlip(customer, dueDate, totalInCents);
         String bookmarkJson = json(bankSlip);
 
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
                 .content(bookmarkJson))
                 .andExpect(status().isCreated())
@@ -141,8 +145,8 @@ public class BankSlipRestControllerTest {
 
     @Test
     public void createBankSlipWithoutRequiredFields() throws Exception {
-        String customer = "Trillian Company";
-        Calendar dueDate = parseDate("2018-01-01");
+        String customer = TRILLIAN_COMPANY;
+        Calendar dueDate = parseDate(DATE);
         BigDecimal totalInCents = new BigDecimal(100000);
         String bankSplitJson = json(new BankSlip(null, dueDate, totalInCents));
         String messageExpected = "Invalid bankslip provided.The possible reasons are:\n" +
@@ -191,23 +195,23 @@ public class BankSlipRestControllerTest {
                 .contentType(contentType)
                 .content("{\"payment_date\" : \"2018-06-30\"}"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Bankslip not found with the specified id"));
+                .andExpect(content().string(BANKSLIP_NOT_FOUND_MESSAGE));
     }
 
     @Test
     public void doPayment() throws Exception {
-        String customer = "Trillian Company";
+        String customer = TRILLIAN_COMPANY;
         Calendar dueDate = Calendar.getInstance();
         BigDecimal totalInCents = new BigDecimal(100000);
         BankSlip bankSlip = new BankSlip(customer, dueDate, totalInCents);
         bankSlipRepository.save(bankSlip);
 
-        this.mockMvc.perform(post("/bankslips/" + bankSlip.getId() + "/payments")
+        this.mockMvc.perform(post(CONTEXT + "/" + bankSlip.getId() + "/payments")
                 .contentType(contentType)
                 .content("{\"payment_date\" : \"2018-06-30\"}"))
                 .andExpect(status().isNoContent());
 
-        BankSlip bankSlipActual = bankSlipRepository.findById(bankSlip.getId()).get();
+        BankSlip bankSlipActual = bankSlipRepository.findById(bankSlip.getId()).orElse(new BankSlip(null, null, null, null));
         assertEquals("2018-06-30", dateToString(bankSlipActual.getPaymentDate()));
         assertEquals(BankSlipStatus.PAID, bankSlipActual.getStatus());
     }
@@ -217,19 +221,19 @@ public class BankSlipRestControllerTest {
         this.mockMvc.perform(delete("/bankslips/1")
                 .contentType(contentType))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Bankslip not found with the specified id"));
+                .andExpect(content().string(BANKSLIP_NOT_FOUND_MESSAGE));
     }
 
     @Test
     public void doCancelPayment() throws Exception {
-        BankSlip bankSlip = new BankSlip("Trillian Company", Calendar.getInstance(), new BigDecimal(100000));
+        BankSlip bankSlip = new BankSlip(TRILLIAN_COMPANY, Calendar.getInstance(), new BigDecimal(100000));
         bankSlipRepository.save(bankSlip);
 
-        this.mockMvc.perform(delete("/bankslips/" + bankSlip.getId())
+        this.mockMvc.perform(delete(CONTEXT + "/" + bankSlip.getId())
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
 
-        BankSlip bankSlipActual = bankSlipRepository.findById(bankSlip.getId()).get();
+        BankSlip bankSlipActual = bankSlipRepository.findById(bankSlip.getId()).orElse(new BankSlip(null, null, null, null));
         assertEquals(BankSlipStatus.CANCELED, bankSlipActual.getStatus());
 
     }

@@ -44,7 +44,7 @@ class BankSlipRestController {
 	}
 
 	@PostMapping
-	ResponseEntity<?> add(@RequestBody BankSlip bankSlip) {
+	ResponseEntity<BankSlip> add(@RequestBody BankSlip bankSlip) {
 		return ResponseEntity.status(HttpStatus.CREATED)
                 .body(this.bankSlipRepository.save(bankSlip));
 	}
@@ -56,7 +56,7 @@ class BankSlipRestController {
 	}
 
 	@PostMapping("/{id}/payments")
-	ResponseEntity<?> doPayment(@PathVariable String id, @RequestBody BankSlip body){
+	ResponseEntity doPayment(@PathVariable String id, @RequestBody BankSlip body){
 		BankSlip bankSlip = this.bankSlipRepository.findById(id)
 				.orElseThrow(BankSlipNotFoundException::new);
 		bankSlip.setPaymentDate(body.getPaymentDate());
@@ -66,7 +66,7 @@ class BankSlipRestController {
 	}
 
 	@DeleteMapping("/{id}")
-	ResponseEntity<?> cancelPayment(@PathVariable String id){
+	ResponseEntity cancelPayment(@PathVariable String id){
 		BankSlip bankSlip = this.bankSlipRepository.findById(id)
 				.orElseThrow(BankSlipNotFoundException::new);
 		bankSlip.setStatus(BankSlipStatus.CANCELED);

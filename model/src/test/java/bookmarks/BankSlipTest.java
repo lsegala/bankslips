@@ -1,4 +1,5 @@
-import bookmarks.BankSlip;
+package bookmarks;
+
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -11,6 +12,9 @@ import static org.junit.Assert.assertNull;
  * Criado por leonardo.segala em 04/07/2018.
  */
 public class BankSlipTest {
+
+    public static final String COMPANY = "Ford Prefect Company";
+
     @Test
     public void testTotalObjectNullable(){
         BankSlip bankSlip = new BankSlip(null, null, null);
@@ -20,27 +24,27 @@ public class BankSlipTest {
     @Test
     public void testTotalObjectWithoutTaxes(){
         BigDecimal totalInCents = new BigDecimal(10000);
-        BankSlip bankSlip = new BankSlip("Ford Prefect Company", Calendar.getInstance(), totalInCents);
-        assertEquals(totalInCents, bankSlip.getTotalInCents());
+        BankSlip bankSlip = new BankSlip(COMPANY, Calendar.getInstance(), totalInCents);
+        assertEquals(totalInCents.longValue(), bankSlip.getTotalInCents().longValue());
     }
 
     @Test
     public void testTotalObjectWithLess10daysLate(){
         BigDecimal totalInCents = new BigDecimal(10000);
-        BigDecimal expectedTotal = totalInCents.add(totalInCents.multiply(new BigDecimal(0.005D)).multiply(new BigDecimal(2)));
+        BigDecimal expectedTotal = totalInCents.add(totalInCents.multiply(BigDecimal.valueOf(0.005D)).multiply(BigDecimal.valueOf(2)));
         Calendar dueDate = Calendar.getInstance();
         dueDate.add(Calendar.DATE, -2);
-        BankSlip bankSlip = new BankSlip("Ford Prefect Company", dueDate, totalInCents);
-        assertEquals(expectedTotal, bankSlip.getTotalInCents());
+        BankSlip bankSlip = new BankSlip(COMPANY, dueDate, totalInCents);
+        assertEquals(expectedTotal.longValue(), bankSlip.getTotalInCents().longValue());
     }
 
     @Test
     public void testTotalObjectWithMore10daysLate(){
         BigDecimal totalInCents = new BigDecimal(10000);
-        BigDecimal expectedTotal = totalInCents.add(totalInCents.multiply(new BigDecimal(0.01D)).multiply(new BigDecimal(11)));
+        BigDecimal expectedTotal = totalInCents.add(totalInCents.multiply(BigDecimal.valueOf(0.01D)).multiply(BigDecimal.valueOf(11)));
         Calendar dueDate = Calendar.getInstance();
         dueDate.add(Calendar.DATE, -11);
-        BankSlip bankSlip = new BankSlip("Ford Prefect Company", dueDate, totalInCents);
-        assertEquals(expectedTotal, bankSlip.getTotalInCents());
+        BankSlip bankSlip = new BankSlip(COMPANY, dueDate, totalInCents);
+        assertEquals(expectedTotal.longValue(), bankSlip.getTotalInCents().longValue());
     }
 }

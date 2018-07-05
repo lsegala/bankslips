@@ -66,8 +66,8 @@ public class BankSlip {
                 .filter(d -> Duration.between(d.toInstant(), Instant.now()).toDays() > 0)
                 .map(d -> {
                     long p = Duration.between(d.toInstant(), Instant.now()).toDays();
-                    BigDecimal j05 = new BigDecimal(0.005D);
-                    BigDecimal j1 = new BigDecimal(0.01D);
+                    BigDecimal j05 = BigDecimal.valueOf(0.005D);
+                    BigDecimal j1 = BigDecimal.valueOf(0.01D);
                     return t.multiply(p <= 10? j05 : j1).multiply(new BigDecimal(p));
                 }).orElse(BigDecimal.ZERO))
             ).orElse(null);

@@ -52,6 +52,10 @@ $ docker run -p 8080:8080 -t leonardosegala/contaazul
 
 http://localhost:8080/v2/api-docs
 
+### Relatórios
+
+É possível acompanhar o relatório de testes e cobertura do código
+
 ## Problemas
 
 Se estiver rodando no windows com docker toolbox, talvez será necessário executar o comando:

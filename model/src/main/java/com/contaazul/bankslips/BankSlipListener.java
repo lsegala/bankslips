@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -18,6 +19,7 @@ public class BankSlipListener {
     @PrePersist
     public void generateUUID(BankSlip obj) throws BankSlipConstraintException {
         obj.setId(UUID.randomUUID().toString());
+        obj.setStatus(Optional.ofNullable(obj.getStatus()).orElse(BankSlipStatus.PENDING));
         validar(obj);
     }
 

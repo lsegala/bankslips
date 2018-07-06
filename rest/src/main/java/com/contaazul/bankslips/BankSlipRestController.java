@@ -32,7 +32,7 @@ import java.util.List;
 // tag::code[]
 @RestController
 @Api(value="bankslips", description="Operations pertaining to bankslips")
-@RequestMapping("/bankslips")
+@RequestMapping("/rest/bankslips")
 class BankSlipRestController {
 
 	private final BankSlipRepository bankSlipRepository;

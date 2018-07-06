@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @WebAppConfiguration
 public class BankSlipRestControllerTest {
     public static final String BANKSLIP_NOT_FOUND_MESSAGE = "Bankslip not found with the specified id";
-    public static final String CONTEXT = "/bankslips";
+    public static final String CONTEXT = "/rest/bankslips";
     public static final String TRILLIAN_COMPANY = "Trillian Company";
     public static final String DATE = "2018-01-01";
     private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -77,7 +77,7 @@ public class BankSlipRestControllerTest {
 
     @Test
     public void bankSlipNotFound() throws Exception {
-        mockMvc.perform(get("/bankslips/1")
+        mockMvc.perform(get(CONTEXT + "/1")
                 .contentType(contentType))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(BANKSLIP_NOT_FOUND_MESSAGE));
@@ -137,7 +137,7 @@ public class BankSlipRestControllerTest {
 
     @Test
     public void createBankSlipWithoutBody() throws Exception {
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().string("Bankslip not provided in the request body"));
@@ -152,7 +152,7 @@ public class BankSlipRestControllerTest {
         String messageExpected = "Invalid bankslip provided.The possible reasons are:\n" +
                 "* A field of the provided bankslip was null or with invalid values";
 
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
                 .content(bankSplitJson))
                 .andExpect(status().is4xxClientError())
@@ -160,7 +160,7 @@ public class BankSlipRestControllerTest {
 
         bankSplitJson = json(new BankSlip(customer, null, totalInCents));
 
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
                 .content(bankSplitJson))
                 .andExpect(status().is4xxClientError())
@@ -168,7 +168,7 @@ public class BankSlipRestControllerTest {
 
         bankSplitJson = json(new BankSlip(customer, dueDate, null));
 
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
                 .content(bankSplitJson))
                 .andExpect(status().is4xxClientError())
@@ -176,13 +176,13 @@ public class BankSlipRestControllerTest {
 
         bankSplitJson = json(new BankSlip(customer, dueDate, new BigDecimal(-1)));
 
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
                 .content(bankSplitJson))
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().string(messageExpected));
 
-        this.mockMvc.perform(post("/bankslips")
+        this.mockMvc.perform(post(CONTEXT)
                 .contentType(contentType)
                 .content("{\"id\":null,\"customer\":\"Trillian Company\",\"status\":\"NOT_EXISTS\",\"due_date\":\"2018-01-01\",\"payment_date\":null,\"total_in_cents\":\"10000\"}"))
                 .andExpect(status().is4xxClientError())
@@ -191,7 +191,7 @@ public class BankSlipRestControllerTest {
 
     @Test
     public void doPaymentWithNonExistentBankSplip() throws Exception {
-        this.mockMvc.perform(post("/bankslips/1/payments")
+        this.mockMvc.perform(post(CONTEXT + "/1/payments")
                 .contentType(contentType)
                 .content("{\"payment_date\" : \"2018-06-30\"}"))
                 .andExpect(status().isNotFound())
@@ -218,7 +218,7 @@ public class BankSlipRestControllerTest {
 
     @Test
     public void doCancelPaymentWithNonExistentBankSplip() throws Exception {
-        this.mockMvc.perform(delete("/bankslips/1")
+        this.mockMvc.perform(delete(CONTEXT + "/1")
                 .contentType(contentType))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(BANKSLIP_NOT_FOUND_MESSAGE));

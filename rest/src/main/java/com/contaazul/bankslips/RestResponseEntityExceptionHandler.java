@@ -42,7 +42,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(BankSlipListener.ERROR_MESSAGE);
         }
-        if(httpServletRequest.getRequestURI().contains("/bankslips")){
+        if(httpServletRequest.getRequestURI().contains("/rest/bankslips")){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Bankslip not provided in the request body");
         }

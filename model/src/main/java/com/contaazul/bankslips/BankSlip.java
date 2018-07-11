@@ -3,6 +3,7 @@ package com.contaazul.bankslips;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -20,18 +21,22 @@ public class BankSlip {
 
     private String customer;
 
+    @ApiModelProperty(dataType = "java.lang.String", value = "")
     @JsonProperty("due_date")
     @JsonFormat(pattern = "yyyy-MM-dd", locale = "pt-BR", timezone = "Brazil/East")
     private Calendar dueDate;
 
+    @ApiModelProperty(dataType = "java.lang.String", value = "")
     @JsonProperty("payment_date")
     @JsonFormat(pattern = "yyyy-MM-dd", locale = "pt-BR", timezone = "Brazil/East")
     private Calendar paymentDate;
 
+    @ApiModelProperty(dataType = "java.lang.Long", value = "")
     @JsonProperty("total_in_cents")
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal totalInCents;
 
+    @ApiModelProperty(dataType = "java.lang.String", value = "")
     @Enumerated(EnumType.STRING)
     private BankSlipStatus status;
 

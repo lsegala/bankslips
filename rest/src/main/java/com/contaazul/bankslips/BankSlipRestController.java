@@ -20,11 +20,18 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author Josh Long
@@ -32,7 +39,7 @@ import java.util.List;
 // tag::code[]
 @RestController
 @Api(value="bankslips", description="Operations pertaining to bankslips")
-@RequestMapping("/rest/bankslips")
+@RequestMapping("/bankslips")
 class BankSlipRestController {
 
 	private final BankSlipRepository bankSlipRepository;
@@ -48,9 +55,20 @@ class BankSlipRestController {
 			@ApiResponse(code = 404, message = "Bankslip not found with the specified id")
 	})
 	@GetMapping("/{id}")
-	BankSlip readBankSlip(@PathVariable String id) {
+	Resource<BankSlip> readBankSlip(@PathVariable String id) {
 		return this.bankSlipRepository.findById(id)
+				.map(b -> toResource(b))
 				.orElseThrow(BankSlipNotFoundException::new);
+	}
+
+	private Resource<BankSlip> toResource(BankSlip b) {
+		return new Resource<>(b,
+				new Link(ServletUriComponentsBuilder
+						.fromCurrentRequest()
+						.path("/{id}")
+						.buildAndExpand(b.getId())
+						.toUriString(), "self"),
+				linkTo(methodOn(BankSlipRestController.class).readBankSlips()).withRel("bankslips-uri"));
 	}
 
 	@ApiOperation(value = "Receave a Bankslip and inserts in a database", response = BankSlip.class)
@@ -60,16 +78,19 @@ class BankSlipRestController {
 			@ApiResponse(code = 422, message = "Invalid bankslip provided")
 	})
 	@PostMapping
-	ResponseEntity<BankSlip> add(@RequestBody BankSlip bankSlip) {
+	ResponseEntity<Resource<BankSlip>> add(@RequestBody BankSlip bankSlip) {
 		return ResponseEntity.status(HttpStatus.CREATED)
-                .body(this.bankSlipRepository.save(bankSlip));
+                .body(toResource(this.bankSlipRepository.save(bankSlip)));
 	}
 
 	@ApiOperation(value = "List all bankslips", response = BankSlip.class)
 	@GetMapping
-	List<BankSlip> readBankSlips() {
+	List<Resource<BankSlip>> readBankSlips() {
 		return this.bankSlipRepository
-			.findAll();
+			.findAll()
+			.stream()
+			.map(b -> toResource(b))
+			.collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Pay an bankslip", response = BankSlip.class)

@@ -89,7 +89,7 @@ public class BankSlipRestControllerTest {
 
         mockMvc.perform(get(CONTEXT + "/" + bankSlip.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(contentType))
+                .andExpect(content().contentType("application/hal+json;charset=UTF-8"))
                 .andExpect(jsonPath("$.customer", is(bankSlip.getCustomer())))
                 .andExpect(jsonPath("$.status", is(BankSlipStatus.PENDING+"")))
                 .andExpect(jsonPath("$.due_date", startsWith(dateToString(bankSlip.getDueDate()))))

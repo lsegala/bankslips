@@ -39,7 +39,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 // tag::code[]
 @RestController
 @Api(value="bankslips", description="Operations pertaining to bankslips")
-@RequestMapping("/bankslips")
+@RequestMapping("/rest/bankslips")
 class BankSlipRestController {
 
 	private final BankSlipRepository bankSlipRepository;

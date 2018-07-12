@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,10 +20,13 @@ import java.util.Optional;
 public class BankSlip {
 
     @Id
+    @NotNull(message = "Invalid bankslip provided.The possible reasons are:\n* A field of the provided bankslip was null or with invalid values")
     private String id;
 
+    @NotNull(message = "Invalid bankslip provided.The possible reasons are:\n* A field of the provided bankslip was null or with invalid values")
     private String customer;
 
+    @NotNull(message = "Invalid bankslip provided.The possible reasons are:\n* A field of the provided bankslip was null or with invalid values")
     @ApiModelProperty(dataType = "java.lang.String", value = "")
     @JsonProperty("due_date")
     @JsonFormat(pattern = "yyyy-MM-dd", locale = "pt-BR", timezone = "Brazil/East")
@@ -31,11 +37,14 @@ public class BankSlip {
     @JsonFormat(pattern = "yyyy-MM-dd", locale = "pt-BR", timezone = "Brazil/East")
     private Calendar paymentDate;
 
+    @Min(value = 0)
+    @NotNull(message = "Invalid bankslip provided.The possible reasons are:\n* A field of the provided bankslip was null or with invalid values")
     @ApiModelProperty(dataType = "java.lang.Long", value = "")
     @JsonProperty("total_in_cents")
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal totalInCents;
 
+    @NotNull(message = "Invalid bankslip provided.The possible reasons are:\n* A field of the provided bankslip was null or with invalid values")
     @ApiModelProperty(dataType = "java.lang.String", value = "")
     @Enumerated(EnumType.STRING)
     private BankSlipStatus status;

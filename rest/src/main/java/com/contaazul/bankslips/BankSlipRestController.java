@@ -42,11 +42,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("/rest/bankslips")
 class BankSlipRestController {
 
-	private final BankSlipRepository bankSlipRepository;
+	private final BankslipService bankslipService;
 
 	@Autowired
-	BankSlipRestController(BankSlipRepository bankSlipRepository) {
-		this.bankSlipRepository = bankSlipRepository;
+	BankSlipRestController(BankslipService bankslipService) {
+		this.bankslipService = bankslipService;
 	}
 
 	@ApiOperation(value = "Read a BankSlip and calculate tax if is late", response = BankSlip.class)
@@ -56,7 +56,7 @@ class BankSlipRestController {
 	})
 	@GetMapping("/{id}")
 	Resource<BankSlip> readBankSlip(@PathVariable String id) {
-		return this.bankSlipRepository.findById(id)
+		return this.bankslipService.findById(id)
 				.map(b -> toResource(b))
 				.orElseThrow(BankSlipNotFoundException::new);
 	}
@@ -80,13 +80,13 @@ class BankSlipRestController {
 	@PostMapping
 	ResponseEntity<Resource<BankSlip>> add(@RequestBody BankSlip bankSlip) {
 		return ResponseEntity.status(HttpStatus.CREATED)
-                .body(toResource(this.bankSlipRepository.save(bankSlip)));
+                .body(toResource(this.bankslipService.save(bankSlip)));
 	}
 
 	@ApiOperation(value = "List all bankslips", response = BankSlip.class)
 	@GetMapping
 	List<Resource<BankSlip>> readBankSlips() {
-		return this.bankSlipRepository
+		return this.bankslipService
 			.findAll()
 			.stream()
 			.map(b -> toResource(b))
@@ -100,11 +100,7 @@ class BankSlipRestController {
 	})
 	@PostMapping("/{id}/payments")
 	ResponseEntity doPayment(@PathVariable String id, @RequestBody BankSlip body){
-		BankSlip bankSlip = this.bankSlipRepository.findById(id)
-				.orElseThrow(BankSlipNotFoundException::new);
-		bankSlip.setPaymentDate(body.getPaymentDate());
-		bankSlip.setStatus(BankSlipStatus.PAID);
-		this.bankSlipRepository.save(bankSlip);
+		this.bankslipService.doPayment(id, body.getPaymentDate());
 		return ResponseEntity.noContent().build();
 	}
 
@@ -115,10 +111,7 @@ class BankSlipRestController {
 	})
 	@DeleteMapping("/{id}")
 	ResponseEntity cancelPayment(@PathVariable String id){
-		BankSlip bankSlip = this.bankSlipRepository.findById(id)
-				.orElseThrow(BankSlipNotFoundException::new);
-		bankSlip.setStatus(BankSlipStatus.CANCELED);
-		this.bankSlipRepository.save(bankSlip);
+		this.bankslipService.cancelPayment(id);
 		return ResponseEntity.noContent().build();
 	}
 }
